@@ -1,5 +1,7 @@
 # better-skills
 
+[![JSR](https://jsr.io/badges/@marve10s/better-skills)](https://jsr.io/@marve10s/better-skills)
+
 Bidirectional converter between `.agents/skills/` (industry standard) and `.claude/skills/` (Claude Code format).
 
 ## Quick Start
@@ -7,6 +9,9 @@ Bidirectional converter between `.agents/skills/` (industry standard) and `.clau
 **Run this command in your project directory** (where your `.agents/skills/` or `.claude/skills/` folder is):
 
 ```bash
+# Using Deno (recommended)
+deno run -A jsr:@marve10s/better-skills
+
 # Using npx (Node.js)
 npx better-skills
 
@@ -31,19 +36,19 @@ This tool bridges the gap with one command.
 
 ```bash
 # Interactive mode - auto-detects and prompts for options
-npx better-skills
+deno run -A jsr:@marve10s/better-skills
 
 # Convert .agents/skills → .claude/skills (for Claude Code)
-npx better-skills --to-claude
+deno run -A jsr:@marve10s/better-skills --to-claude
 
 # Convert .claude/skills → .agents/skills (export to other tools)
-npx better-skills --to-agents
+deno run -A jsr:@marve10s/better-skills --to-agents
 
 # Sync both directions
-npx better-skills --sync
+deno run -A jsr:@marve10s/better-skills --sync
 
 # Non-interactive with all options
-npx better-skills --to-claude --mode symlink --conflict skip --non-interactive
+deno run -A jsr:@marve10s/better-skills --to-claude --mode symlink --conflict skip --non-interactive
 ```
 
 ## Options
@@ -70,7 +75,7 @@ npx better-skills --to-claude --mode symlink --conflict skip --non-interactive
 
 ## Requirements
 
-- Node.js 18+ or [Bun](https://bun.sh)
+- [Deno](https://deno.land) (recommended), Node.js 18+, or [Bun](https://bun.sh)
 
 ## License
 

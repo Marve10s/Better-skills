@@ -72,8 +72,8 @@ const showHelp = (): void => {
 better-skills - Bidirectional converter between .agents/skills/ and .claude/skills/
 
 USAGE:
+  deno run -A jsr:@marve10s/better-skills [options]
   npx better-skills [options]
-  pnpm dlx better-skills [options]
   bunx better-skills [options]
 
 OPTIONS:
