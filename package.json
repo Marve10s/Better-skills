@@ -1,15 +1,24 @@
 {
-  "name": "skills-to-claude",
-  "version": "1.0.0",
+  "name": "better-skills",
+  "version": "1.0.1",
   "description": "Bidirectional converter between .agents/skills/ and .claude/skills/ formats",
   "type": "module",
   "main": "src/index.ts",
   "bin": {
-    "skills-to-claude": "./src/index.ts"
+    "better-skills": "./src/index.ts"
   },
+  "files": [
+    "src/**/*.ts"
+  ],
   "scripts": {
-    "start": "tsx src/index.ts",
-    "typecheck": "tsc --noEmit"
+    "start": "bun src/index.ts",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "bump": "bumpp",
+    "release": "bun run test && bun run lint && bumpp && npm publish"
   },
   "dependencies": {
     "effect": "^3.0.0",
@@ -19,7 +28,10 @@
     "tsx": "^4.7.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.14",
+    "@types/bun": "latest",
     "@types/node": "^20.0.0",
+    "bumpp": "^10.4.0",
     "typescript": "^5.3.0"
   },
   "engines": {
@@ -30,7 +42,19 @@
     "skills",
     "agents",
     "converter",
-    "cli"
+    "cli",
+    "cursor",
+    "copilot",
+    "ai"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anthropics/better-skills"
+  },
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/anthropics/better-skills/issues"
+  },
+  "homepage": "https://github.com/anthropics/better-skills#readme"
 }
