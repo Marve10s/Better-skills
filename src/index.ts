@@ -1,11 +1,11 @@
-import { Effect } from "effect";
+#!/usr/bin/env node
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { detectSkills, directoryExists } from "./detector.js";
-import { convertSkills, validateSkill } from "./converter.js";
+import { Effect } from "effect";
+import { convertSkills, validateSkill } from "./converter.ts";
+import { detectSkills, directoryExists } from "./detector.ts";
 import {
   closePrompts,
-  confirm,
   displayResults,
   displaySkills,
   print,
@@ -14,14 +14,13 @@ import {
   promptCustomDirectory,
   promptDirection,
   promptNoSkillsFound,
-} from "./prompts.js";
+} from "./prompts.ts";
 import type {
   ConflictResolution,
   ConversionDirection,
   ConversionMode,
   ConversionOptions,
-  DetectedSkill,
-} from "./types.js";
+} from "./types.ts";
 
 const AGENTS_SKILLS_DIR = ".agents/skills";
 const CLAUDE_SKILLS_DIR = ".claude/skills";
@@ -70,12 +69,12 @@ const parseArgs = (): Partial<ConversionOptions> & { help?: boolean } => {
 
 const showHelp = (): void => {
   console.log(`
-skills-to-claude - Bidirectional converter between .agents/skills/ and .claude/skills/
+better-skills - Bidirectional converter between .agents/skills/ and .claude/skills/
 
 USAGE:
-  npm start -- [options]
-  pnpm start [options]
-  bun start [options]
+  npx better-skills [options]
+  pnpm dlx better-skills [options]
+  bunx better-skills [options]
 
 OPTIONS:
   --source <dir>      Source directory (default: auto-detect)
@@ -90,19 +89,19 @@ OPTIONS:
 
 EXAMPLES:
   # Interactive mode (auto-detects direction)
-  npm start
+  npx better-skills
 
   # Convert industry skills to Claude Code format
-  npm start -- --to-claude
+  npx better-skills --to-claude
 
   # Export Claude skills to industry standard format
-  npm start -- --to-agents
+  npx better-skills --to-agents
 
   # Bidirectional sync with symlinks
-  npm start -- --sync
+  npx better-skills --sync
 
   # Non-interactive with specific settings
-  npm start -- --to-claude --mode copy --conflict overwrite --non-interactive
+  npx better-skills --to-claude --mode copy --conflict overwrite --non-interactive
 `);
 };
 
@@ -111,7 +110,7 @@ const runConversion = async (
   targetDir: string,
   mode: ConversionMode,
   conflictResolution: ConflictResolution,
-  nonInteractive: boolean
+  nonInteractive: boolean,
 ): Promise<void> => {
   const skills = await Effect.runPromise(detectSkills(sourceDir));
 
@@ -149,14 +148,16 @@ const runConversion = async (
         try {
           if (fs.lstatSync(targetPath).isSymbolicLink()) {
             const linkTarget = fs.readlinkSync(targetPath);
-            const resolvedTarget = path.resolve(path.dirname(targetPath), linkTarget);
+            const resolvedTarget = path.resolve(
+              path.dirname(targetPath),
+              linkTarget,
+            );
             const resolvedSource = path.resolve(skill.path);
             if (resolvedTarget === resolvedSource) {
               continue;
             }
           }
-        } catch {
-        }
+        } catch {}
 
         finalConflictResolution = await promptConflictResolution(skill.name);
         break;
@@ -165,7 +166,7 @@ const runConversion = async (
   }
 
   const results = await Effect.runPromise(
-    convertSkills(skills, targetDir, finalMode, finalConflictResolution)
+    convertSkills(skills, targetDir, finalMode, finalConflictResolution),
   );
 
   displayResults(results);
@@ -196,7 +197,10 @@ const main = async (): Promise<void> => {
     if (hasAgents && hasClaude && !args.nonInteractive) {
       const agentsSkills = await Effect.runPromise(detectSkills(agentsDir));
       const claudeSkills = await Effect.runPromise(detectSkills(claudeDir));
-      direction = await promptDirection(agentsSkills.length, claudeSkills.length);
+      direction = await promptDirection(
+        agentsSkills.length,
+        claudeSkills.length,
+      );
     } else if (hasAgents) {
       direction = "to-claude";
     } else if (hasClaude) {
@@ -227,7 +231,7 @@ const main = async (): Promise<void> => {
             process.exit(1);
           }
           targetDir = await promptCustomDirectory(
-            "Enter target directory (or press Enter for .claude/skills/): "
+            "Enter target directory (or press Enter for .claude/skills/): ",
           );
           if (!targetDir) {
             targetDir = claudeDir;
@@ -266,7 +270,7 @@ const main = async (): Promise<void> => {
       claudeDir,
       args.mode || "symlink",
       args.conflictResolution || "skip",
-      args.nonInteractive || false
+      args.nonInteractive || false,
     );
 
     print(`\n${CLAUDE_SKILLS_DIR}/ -> ${AGENTS_SKILLS_DIR}/:`);
@@ -275,17 +279,19 @@ const main = async (): Promise<void> => {
       agentsDir,
       args.mode || "symlink",
       args.conflictResolution || "skip",
-      args.nonInteractive || false
+      args.nonInteractive || false,
     );
 
-    print("\n[DONE] Skills synced! Changes in either location will be reflected.");
+    print(
+      "\n[DONE] Skills synced! Changes in either location will be reflected.",
+    );
   } else {
     await runConversion(
       sourceDir!,
       targetDir!,
       args.mode || "symlink",
       args.conflictResolution || "skip",
-      args.nonInteractive || false
+      args.nonInteractive || false,
     );
   }
 

@@ -1,4 +1,4 @@
-# skills-to-claude
+# better-skills
 
 Bidirectional CLI tool to convert between `.agents/skills/` (industry standard) and `.claude/skills/` (Claude Code format).
 
@@ -11,6 +11,11 @@ src/
   detector.ts   - Skill detection, validation, frontmatter parsing
   converter.ts  - Symlink/copy/move operations, conflict handling
   prompts.ts    - User interaction via readline
+tests/
+  detector.test.ts    - Skill detection tests
+  converter.test.ts   - Conversion logic tests
+  integration.test.ts - End-to-end tests
+  fixtures/           - Test skill directories
 ```
 
 ## Key Concepts
@@ -20,33 +25,44 @@ src/
 - Conversion modes: symlink (default), copy, move
 - Bidirectional: Can convert in either direction or sync both
 
-## Running Locally
+## User Usage (no clone required)
 
 ```bash
-# npm
-npm install
-npm start
+# Run directly with npx, pnpm dlx, or bunx
+npx better-skills
+pnpm dlx better-skills
+bunx better-skills
 
-# pnpm
-pnpm install
-pnpm start
+# With options
+npx better-skills --to-claude
+npx better-skills --sync --mode copy
+```
 
-# bun
+## Development
+
+Uses bun for development:
+
+```bash
+# Install
 bun install
+
+# Run locally
 bun start
+
+# Run tests
+bun test
+bun test --watch
+
+# Lint
+bun lint
+bun lint:fix
+
+# Type check
+bun run typecheck
 ```
 
 ## Dependencies
 
 - Effect-TS for functional patterns
 - yaml for frontmatter parsing
-- tsx for TypeScript execution (npm/pnpm)
-
-## Testing
-
-Test with a project that has `.agents/skills/` or `.claude/skills/` directories:
-
-```bash
-cd /path/to/project-with-skills
-npm start -- --to-claude
-```
+- tsx for Node.js TypeScript execution (for npx/pnpm users)

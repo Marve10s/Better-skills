@@ -1,12 +1,12 @@
-import { Effect } from "effect";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { Effect } from "effect";
 import type {
+  ConflictResolution,
   ConversionMode,
   ConversionResult,
-  ConflictResolution,
   DetectedSkill,
-} from "./types.js";
+} from "./types.ts";
 
 const ensureDir = (dir: string): void => {
   if (!fs.existsSync(dir)) {
@@ -68,14 +68,24 @@ export const convertSkill = (
   skill: DetectedSkill,
   targetDir: string,
   mode: ConversionMode,
-  conflictResolution: ConflictResolution = "skip"
+  conflictResolution: ConflictResolution = "skip",
 ): Effect.Effect<ConversionResult, Error> =>
   Effect.try({
     try: () => {
       const targetPath = path.join(targetDir, skill.name);
       const sourcePath = skill.path;
 
-      if (fs.existsSync(targetPath)) {
+      // Use lstatSync to check if the symlink itself exists (without following it)
+      const targetExists = (() => {
+        try {
+          fs.lstatSync(targetPath);
+          return true;
+        } catch {
+          return false;
+        }
+      })();
+
+      if (targetExists) {
         if (mode === "symlink" && isSymlinkTo(targetPath, sourcePath)) {
           return {
             skill,
@@ -99,7 +109,10 @@ export const convertSkill = (
           case "backup": {
             const backupDir = path.join(targetDir, "_backup");
             ensureDir(backupDir);
-            const backupPath = path.join(backupDir, `${skill.name}-${Date.now()}`);
+            const backupPath = path.join(
+              backupDir,
+              `${skill.name}-${Date.now()}`,
+            );
             fs.renameSync(targetPath, backupPath);
             break;
           }
@@ -171,7 +184,7 @@ export const convertSkills = (
   skills: DetectedSkill[],
   targetDir: string,
   mode: ConversionMode,
-  conflictResolution: ConflictResolution = "skip"
+  conflictResolution: ConflictResolution = "skip",
 ): Effect.Effect<ConversionResult[], Error> =>
   Effect.all(
     skills.map((skill) =>
@@ -183,14 +196,14 @@ export const convertSkills = (
             action: "skipped" as const,
             targetPath: path.join(targetDir, skill.name),
             error: error.message,
-          })
-        )
-      )
-    )
+          }),
+        ),
+      ),
+    ),
   );
 
 export const validateSkill = (
-  skill: DetectedSkill
+  skill: DetectedSkill,
 ): { valid: boolean; warnings: string[] } => {
   const warnings: string[] = [];
 
@@ -199,7 +212,9 @@ export const validateSkill = (
   }
 
   if (skill.hasRules && !skill.hasAgentsMd) {
-    warnings.push("Has rules/ directory but no AGENTS.md - may need to run build");
+    warnings.push(
+      "Has rules/ directory but no AGENTS.md - may need to run build",
+    );
   }
 
   return {

@@ -1,11 +1,11 @@
 import * as readline from "node:readline";
+import { formatSkillDisplay } from "./detector.ts";
 import type {
-  ConversionMode,
   ConflictResolution,
   ConversionDirection,
+  ConversionMode,
   DetectedSkill,
-} from "./types.js";
-import { formatSkillDisplay } from "./detector.js";
+} from "./types.ts";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -25,7 +25,7 @@ export const closePrompts = (): void => {
 
 export const displaySkills = (
   skills: DetectedSkill[],
-  sourceDir: string
+  sourceDir: string,
 ): void => {
   console.log(`\nFound ${skills.length} skill(s) in ${sourceDir}:`);
 
@@ -40,13 +40,15 @@ export const displaySkills = (
 
 export const promptConversionMode = async (): Promise<ConversionMode> => {
   console.log("Choose conversion mode:");
-  console.log("  [1] Symlink (recommended) - Link to source, both stay in sync");
+  console.log(
+    "  [1] Symlink (recommended) - Link to source, both stay in sync",
+  );
   console.log("  [2] Copy - Duplicate files to target");
   console.log("  [3] Move - Move to target, remove from source");
   console.log();
 
   const answer = await ask("Selection [1]: ");
-  const choice = parseInt(answer) || 1;
+  const choice = parseInt(answer, 10) || 1;
 
   switch (choice) {
     case 2:
@@ -59,7 +61,7 @@ export const promptConversionMode = async (): Promise<ConversionMode> => {
 };
 
 export const promptConflictResolution = async (
-  skillName: string
+  skillName: string,
 ): Promise<ConflictResolution> => {
   console.log(`\n[WARN] Conflict: ${skillName} already exists in target`);
   console.log();
@@ -70,7 +72,7 @@ export const promptConflictResolution = async (
   console.log();
 
   const answer = await ask("Selection [1]: ");
-  const choice = parseInt(answer) || 1;
+  const choice = parseInt(answer, 10) || 1;
 
   switch (choice) {
     case 2:
@@ -84,7 +86,7 @@ export const promptConflictResolution = async (
 
 export const promptDirection = async (
   agentsCount: number,
-  claudeCount: number
+  claudeCount: number,
 ): Promise<ConversionDirection> => {
   console.log("\nBoth skill directories found:");
   console.log(`  .agents/skills/ (${agentsCount} skills)`);
@@ -97,7 +99,7 @@ export const promptDirection = async (
   console.log();
 
   const answer = await ask("Selection [1]: ");
-  const choice = parseInt(answer) || 1;
+  const choice = parseInt(answer, 10) || 1;
 
   switch (choice) {
     case 2:
@@ -109,17 +111,21 @@ export const promptDirection = async (
   }
 };
 
-export const promptNoSkillsFound = async (): Promise<"create" | "specify" | "exit"> => {
+export const promptNoSkillsFound = async (): Promise<
+  "create" | "specify" | "exit"
+> => {
   console.log("\n[WARN] No .agents/skills/ directory found.");
   console.log();
   console.log("Would you like to:");
-  console.log("  [1] Create .agents/skills/ and add skills with 'npx skills add'");
+  console.log(
+    "  [1] Create .agents/skills/ and add skills with 'npx skills add'",
+  );
   console.log("  [2] Specify a different source directory");
   console.log("  [3] Exit");
   console.log();
 
   const answer = await ask("Selection [3]: ");
-  const choice = parseInt(answer) || 3;
+  const choice = parseInt(answer, 10) || 3;
 
   switch (choice) {
     case 1:
@@ -132,7 +138,7 @@ export const promptNoSkillsFound = async (): Promise<"create" | "specify" | "exi
 };
 
 export const promptCustomDirectory = async (
-  prompt: string
+  prompt: string,
 ): Promise<string> => {
   const answer = await ask(prompt);
   return answer;
@@ -149,7 +155,7 @@ export const displayResults = (
     success: boolean;
     action: string;
     error?: string;
-  }>
+  }>,
 ): void => {
   console.log("\nConversion results:");
 
@@ -160,7 +166,9 @@ export const displayResults = (
   for (const result of results) {
     if (result.success) {
       if (result.action === "skipped") {
-        console.log(`  [WARN] ${result.skill.name} (${result.error || "skipped"})`);
+        console.log(
+          `  [WARN] ${result.skill.name} (${result.error || "skipped"})`,
+        );
         skipCount++;
       } else {
         console.log(`  [OK] ${result.skill.name} -> ${result.action}`);

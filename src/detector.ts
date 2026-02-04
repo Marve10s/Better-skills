@@ -1,10 +1,10 @@
-import { Effect } from "effect";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { Effect } from "effect";
 import * as yaml from "yaml";
-import type { DetectedSkill, SkillFrontmatter } from "./types.js";
+import type { DetectedSkill, SkillFrontmatter } from "./types.ts";
 
-const parseFrontmatter = (content: string): SkillFrontmatter => {
+export const parseFrontmatter = (content: string): SkillFrontmatter => {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
 
@@ -29,17 +29,17 @@ const getDirectorySizeKb = (dirPath: string): number => {
           totalSize += fs.statSync(fullPath).size;
         }
       }
-    } catch {
-    }
+    } catch {}
   };
 
   walkDir(dirPath);
   return Math.round(totalSize / 1024);
 };
 
-const countReferences = (content: string): number => {
+export const countReferences = (content: string): number => {
   const wikiLinks = (content.match(/\[\[[^\]]+\]\]/g) || []).length;
-  const markdownLinks = (content.match(/\[([^\]]+)\]\(([^)]+)\)/g) || []).length;
+  const markdownLinks = (content.match(/\[([^\]]+)\]\(([^)]+)\)/g) || [])
+    .length;
   return wikiLinks + markdownLinks;
 };
 
@@ -58,8 +58,7 @@ const analyzeSkill = (skillPath: string): DetectedSkill | null => {
   if (isSymlink) {
     try {
       symlinkTarget = fs.readlinkSync(skillPath);
-    } catch {
-    }
+    } catch {}
   }
 
   let skillMdContent = "";
@@ -68,8 +67,7 @@ const analyzeSkill = (skillPath: string): DetectedSkill | null => {
   try {
     skillMdContent = fs.readFileSync(skillMdPath, "utf-8");
     frontmatter = parseFrontmatter(skillMdContent);
-  } catch {
-  }
+  } catch {}
 
   const hasAgentsMd = fs.existsSync(path.join(skillPath, "AGENTS.md"));
   const hasRules = fs.existsSync(path.join(skillPath, "rules"));
@@ -93,7 +91,9 @@ const analyzeSkill = (skillPath: string): DetectedSkill | null => {
   };
 };
 
-export const detectSkills = (dir: string): Effect.Effect<DetectedSkill[], Error> =>
+export const detectSkills = (
+  dir: string,
+): Effect.Effect<DetectedSkill[], Error> =>
   Effect.try({
     try: () => {
       if (!fs.existsSync(dir)) {
@@ -124,7 +124,9 @@ export const detectSkills = (dir: string): Effect.Effect<DetectedSkill[], Error>
           if (skill) skills.push(skill);
         } else {
           try {
-            const nestedEntries = fs.readdirSync(actualPath, { withFileTypes: true });
+            const nestedEntries = fs.readdirSync(actualPath, {
+              withFileTypes: true,
+            });
             for (const nestedEntry of nestedEntries) {
               if (!nestedEntry.isDirectory()) continue;
               const nestedPath = path.join(skillPath, nestedEntry.name);
@@ -134,8 +136,7 @@ export const detectSkills = (dir: string): Effect.Effect<DetectedSkill[], Error>
                 skills.push(skill);
               }
             }
-          } catch {
-          }
+          } catch {}
         }
       }
 
