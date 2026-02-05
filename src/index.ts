@@ -25,7 +25,7 @@ import type {
   ConversionOptions,
 } from "./types.ts";
 
-const VERSION = "0.1.3";
+const VERSION = "0.1.4";
 const AGENTS_SKILLS_DIR = ".agents/skills";
 const CLAUDE_SKILLS_DIR = ".claude/skills";
 
@@ -42,7 +42,7 @@ const checkForUpdates = async (): Promise<void> => {
 
     if (!res.ok) return;
 
-    const data = await res.json();
+    const data = (await res.json()) as { latest?: string };
     const latest = data.latest;
 
     if (latest && latest !== VERSION) {
