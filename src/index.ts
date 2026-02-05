@@ -73,8 +73,10 @@ better-skills - Bidirectional converter between .agents/skills/ and .claude/skil
 
 USAGE:
   deno run -A jsr:@marve10s/better-skills [options]
-  npx better-skills [options]
-  bunx better-skills [options]
+
+INSTALL GLOBALLY:
+  deno install -A -g -n better-skills jsr:@marve10s/better-skills
+  better-skills [options]
 
 OPTIONS:
   --source <dir>      Source directory (default: auto-detect)

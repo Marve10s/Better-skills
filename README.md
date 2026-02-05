@@ -9,20 +9,19 @@ Bidirectional converter between `.agents/skills/` (industry standard) and `.clau
 **Run this command in your project directory** (where your `.agents/skills/` or `.claude/skills/` folder is):
 
 ```bash
-# Using Deno (recommended)
 deno run -A jsr:@marve10s/better-skills
-
-# Using npx (Node.js)
-npx better-skills
-
-# Using pnpm
-pnpm dlx better-skills
-
-# Using bun
-bunx better-skills
 ```
 
 That's it. No installation, no cloning. The interactive wizard guides you through the conversion.
+
+### Alternative: Install globally
+
+```bash
+deno install -A -g -n better-skills jsr:@marve10s/better-skills
+
+# Then use anywhere:
+better-skills
+```
 
 ## The Problem
 
@@ -75,7 +74,7 @@ deno run -A jsr:@marve10s/better-skills --to-claude --mode symlink --conflict sk
 
 ## Requirements
 
-- [Deno](https://deno.land) (recommended), Node.js 18+, or [Bun](https://bun.sh)
+- [Deno](https://deno.land) 1.37+
 
 ## License
 
