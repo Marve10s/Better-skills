@@ -25,6 +25,7 @@
     "@effect/platform": "^0.58.0",
     "@inquirer/prompts": "^8.2.0",
     "effect": "^3.0.0",
+    "picocolors": "^1.1.1",
     "tsx": "^4.7.0",
     "yaml": "^2.4.0"
   },
