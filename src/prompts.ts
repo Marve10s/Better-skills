@@ -1,4 +1,4 @@
-import * as readline from "node:readline";
+import { input, select } from "@inquirer/prompts";
 import { formatSkillDisplay } from "./detector.ts";
 import type {
   ConflictResolution,
@@ -7,20 +7,8 @@ import type {
   DetectedSkill,
 } from "./types.ts";
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
-const ask = (question: string): Promise<string> =>
-  new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      resolve(answer.trim());
-    });
-  });
-
 export const closePrompts = (): void => {
-  rl.close();
+  // No-op: @inquirer/prompts handles cleanup automatically
 };
 
 export const displaySkills = (
@@ -39,49 +27,53 @@ export const displaySkills = (
 };
 
 export const promptConversionMode = async (): Promise<ConversionMode> => {
-  console.log("Choose conversion mode:");
-  console.log(
-    "  [1] Symlink (recommended) - Link to source, both stay in sync",
-  );
-  console.log("  [2] Copy - Duplicate files to target");
-  console.log("  [3] Move - Move to target, remove from source");
-  console.log();
+  const answer = await select({
+    message: "Choose conversion mode:",
+    choices: [
+      {
+        name: "Symlink (recommended) - Link to source, both stay in sync",
+        value: "symlink" as ConversionMode,
+      },
+      {
+        name: "Copy - Duplicate files to target",
+        value: "copy" as ConversionMode,
+      },
+      {
+        name: "Move - Move to target, remove from source",
+        value: "move" as ConversionMode,
+      },
+    ],
+    default: "symlink",
+  });
 
-  const answer = await ask("Selection [1]: ");
-  const choice = parseInt(answer, 10) || 1;
-
-  switch (choice) {
-    case 2:
-      return "copy";
-    case 3:
-      return "move";
-    default:
-      return "symlink";
-  }
+  return answer;
 };
 
 export const promptConflictResolution = async (
   skillName: string,
 ): Promise<ConflictResolution> => {
   console.log(`\n[WARN] Conflict: ${skillName} already exists in target`);
-  console.log();
-  console.log("Options:");
-  console.log("  [1] Skip - Keep existing");
-  console.log("  [2] Overwrite - Replace with source version");
-  console.log("  [3] Backup & Replace - Move existing to _backup/");
-  console.log();
 
-  const answer = await ask("Selection [1]: ");
-  const choice = parseInt(answer, 10) || 1;
+  const answer = await select({
+    message: "How should conflicts be handled?",
+    choices: [
+      {
+        name: "Skip - Keep existing",
+        value: "skip" as ConflictResolution,
+      },
+      {
+        name: "Overwrite - Replace with source version",
+        value: "overwrite" as ConflictResolution,
+      },
+      {
+        name: "Backup & Replace - Move existing to _backup/",
+        value: "backup" as ConflictResolution,
+      },
+    ],
+    default: "skip",
+  });
 
-  switch (choice) {
-    case 2:
-      return "overwrite";
-    case 3:
-      return "backup";
-    default:
-      return "skip";
-  }
+  return answer;
 };
 
 export const promptDirection = async (
@@ -91,62 +83,74 @@ export const promptDirection = async (
   console.log("\nBoth skill directories found:");
   console.log(`  .agents/skills/ (${agentsCount} skills)`);
   console.log(`  .claude/skills/ (${claudeCount} skills)`);
-  console.log();
-  console.log("Choose direction:");
-  console.log("  [1] .agents -> .claude (use industry skills in Claude Code)");
-  console.log("  [2] .claude -> .agents (export Claude skills to other tools)");
-  console.log("  [3] Sync both directions");
-  console.log();
 
-  const answer = await ask("Selection [1]: ");
-  const choice = parseInt(answer, 10) || 1;
+  const answer = await select({
+    message: "Choose direction:",
+    choices: [
+      {
+        name: ".agents -> .claude (use industry skills in Claude Code)",
+        value: "to-claude" as ConversionDirection,
+      },
+      {
+        name: ".claude -> .agents (export Claude skills to other tools)",
+        value: "to-agents" as ConversionDirection,
+      },
+      {
+        name: "Sync both directions",
+        value: "sync" as ConversionDirection,
+      },
+    ],
+    default: "to-claude",
+  });
 
-  switch (choice) {
-    case 2:
-      return "to-agents";
-    case 3:
-      return "sync";
-    default:
-      return "to-claude";
-  }
+  return answer;
 };
 
 export const promptNoSkillsFound = async (): Promise<
   "create" | "specify" | "exit"
 > => {
   console.log("\n[WARN] No .agents/skills/ directory found.");
-  console.log();
-  console.log("Would you like to:");
-  console.log(
-    "  [1] Create .agents/skills/ and add skills with 'npx skills add'",
-  );
-  console.log("  [2] Specify a different source directory");
-  console.log("  [3] Exit");
-  console.log();
 
-  const answer = await ask("Selection [3]: ");
-  const choice = parseInt(answer, 10) || 3;
+  const answer = await select({
+    message: "Would you like to:",
+    choices: [
+      {
+        name: "Create .agents/skills/ and add skills with 'npx skills add'",
+        value: "create" as const,
+      },
+      {
+        name: "Specify a different source directory",
+        value: "specify" as const,
+      },
+      {
+        name: "Exit",
+        value: "exit" as const,
+      },
+    ],
+    default: "exit",
+  });
 
-  switch (choice) {
-    case 1:
-      return "create";
-    case 2:
-      return "specify";
-    default:
-      return "exit";
-  }
+  return answer;
 };
 
 export const promptCustomDirectory = async (
   prompt: string,
 ): Promise<string> => {
-  const answer = await ask(prompt);
-  return answer;
+  const answer = await input({ message: prompt });
+  return answer.trim();
 };
 
 export const confirm = async (message: string): Promise<boolean> => {
-  const answer = await ask(`${message} [Y/n]: `);
-  return answer.toLowerCase() !== "n";
+  const answer = await select({
+    message,
+    choices: [
+      { name: "Yes", value: true },
+      { name: "No", value: false },
+    ],
+    default: true,
+  });
+
+  return answer;
 };
 
 export const displayResults = (

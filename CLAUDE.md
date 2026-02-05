@@ -1,4 +1,8 @@
-# better-skills
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Overview
 
 Bidirectional CLI tool to convert between `.agents/skills/` (industry standard) and `.claude/skills/` (Claude Code format).
 
@@ -10,7 +14,7 @@ src/
   types.ts      - TypeScript type definitions
   detector.ts   - Skill detection, validation, frontmatter parsing
   converter.ts  - Symlink/copy/move operations, conflict handling
-  prompts.ts    - User interaction via readline
+  prompts.ts    - Interactive prompts via @inquirer/prompts
 tests/
   detector.test.ts    - Skill detection tests
   converter.test.ts   - Conversion logic tests
@@ -25,44 +29,23 @@ tests/
 - Conversion modes: symlink (default), copy, move
 - Bidirectional: Can convert in either direction or sync both
 
-## User Usage (no clone required)
-
-```bash
-# Run directly with npx, pnpm dlx, or bunx
-npx better-skills
-pnpm dlx better-skills
-bunx better-skills
-
-# With options
-npx better-skills --to-claude
-npx better-skills --sync --mode copy
-```
-
 ## Development
 
 Uses bun for development:
 
 ```bash
-# Install
-bun install
-
-# Run locally
-bun start
-
-# Run tests
-bun test
-bun test --watch
-
-# Lint
-bun lint
-bun lint:fix
-
-# Type check
-bun run typecheck
+bun install          # Install dependencies
+bun start            # Run locally
+bun test             # Run tests
+bun test --watch     # Watch mode
+bun lint             # Check linting
+bun lint:fix         # Fix lint issues
+bun run typecheck    # Type check
 ```
 
 ## Dependencies
 
 - Effect-TS for functional patterns
+- @inquirer/prompts for interactive arrow-key menus
 - yaml for frontmatter parsing
 - tsx for Node.js TypeScript execution (for npx/pnpm users)

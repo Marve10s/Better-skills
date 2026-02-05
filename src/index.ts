@@ -298,6 +298,7 @@ const main = async (): Promise<void> => {
   }
 
   closePrompts();
+  process.exit(0);
 };
 
 main().catch((error) => {
