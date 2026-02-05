@@ -25,8 +25,38 @@ import type {
   ConversionOptions,
 } from "./types.ts";
 
+const VERSION = "0.1.3";
 const AGENTS_SKILLS_DIR = ".agents/skills";
 const CLAUDE_SKILLS_DIR = ".claude/skills";
+
+const checkForUpdates = async (): Promise<void> => {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+
+    const res = await fetch(
+      "https://jsr.io/@marve10s/better-skills/meta.json",
+      { signal: controller.signal },
+    );
+    clearTimeout(timeout);
+
+    if (!res.ok) return;
+
+    const data = await res.json();
+    const latest = data.latest;
+
+    if (latest && latest !== VERSION) {
+      console.log(
+        `\n${pc.yellow("Update available:")} ${pc.dim(VERSION)} → ${pc.green(latest)}`,
+      );
+      console.log(
+        `${pc.dim("Run:")} deno run -A --reload jsr:@marve10s/better-skills\n`,
+      );
+    }
+  } catch {
+    // Silently ignore - don't block CLI if offline
+  }
+};
 
 const parseArgs = (): Partial<ConversionOptions> & { help?: boolean } => {
   const args = process.argv.slice(2);
@@ -175,6 +205,8 @@ const main = async (): Promise<void> => {
     showHelp();
     return;
   }
+
+  await checkForUpdates();
 
   const cwd = process.cwd();
   const agentsDir = path.join(cwd, AGENTS_SKILLS_DIR);
