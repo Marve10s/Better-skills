@@ -1,9 +1,13 @@
 {
   "$schema": "https://jsr.io/schema/config-file.v1.json",
   "name": "@marve10s/better-skills",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "exports": "./mod.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Marve10s/Better-skills"
+  },
   "compilerOptions": {
     "lib": ["ES2022", "DOM"]
   }
