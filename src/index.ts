@@ -25,7 +25,7 @@ import type {
   ConversionOptions,
 } from "./types.ts";
 
-const VERSION = "0.1.4";
+const VERSION = "0.1.5";
 const AGENTS_SKILLS_DIR = ".agents/skills";
 const CLAUDE_SKILLS_DIR = ".claude/skills";
 
@@ -53,9 +53,7 @@ const checkForUpdates = async (): Promise<void> => {
         `${pc.dim("Run:")} deno run -A --reload jsr:@marve10s/better-skills\n`,
       );
     }
-  } catch {
-    // Silently ignore - don't block CLI if offline
-  }
+  } catch {}
 };
 
 const parseArgs = (): Partial<ConversionOptions> & { help?: boolean } => {

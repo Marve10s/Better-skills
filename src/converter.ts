@@ -75,7 +75,30 @@ export const convertSkill = (
       const targetPath = path.join(targetDir, skill.name);
       const sourcePath = skill.path;
 
-      // Use lstatSync to check if the symlink itself exists (without following it)
+      if (skill.isSymlink) {
+        try {
+          const realSource = fs.realpathSync(sourcePath);
+          const resolvedTargetDir = path.resolve(targetDir);
+          if (realSource.startsWith(resolvedTargetDir + path.sep)) {
+            return {
+              skill,
+              success: true,
+              action: "skipped" as const,
+              targetPath,
+              error: "Circular symlink",
+            };
+          }
+        } catch {
+          return {
+            skill,
+            success: true,
+            action: "skipped" as const,
+            targetPath,
+            error: "Broken symlink",
+          };
+        }
+      }
+
       const targetExists = (() => {
         try {
           fs.lstatSync(targetPath);

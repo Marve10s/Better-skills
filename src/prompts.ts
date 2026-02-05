@@ -8,9 +8,7 @@ import type {
   DetectedSkill,
 } from "./types.ts";
 
-export const closePrompts = (): void => {
-  // No-op: @inquirer/prompts handles cleanup automatically
-};
+export const closePrompts = (): void => {};
 
 export const displaySkills = (
   skills: DetectedSkill[],

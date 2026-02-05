@@ -1,7 +1,7 @@
 {
   "$schema": "https://jsr.io/schema/config-file.v1.json",
   "name": "@marve10s/better-skills",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "license": "MIT",
   "exports": "./mod.ts",
   "repository": {
