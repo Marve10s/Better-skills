@@ -17,6 +17,7 @@ import {
   promptCustomDirectory,
   promptDirection,
   promptNoSkillsFound,
+  promptSingleDirection,
 } from "./prompts.ts";
 import type {
   ConflictResolution,
@@ -25,7 +26,7 @@ import type {
   ConversionOptions,
 } from "./types.ts";
 
-const VERSION = "0.1.5";
+const VERSION = "0.1.6";
 const AGENTS_SKILLS_DIR = ".agents/skills";
 const CLAUDE_SKILLS_DIR = ".claude/skills";
 
@@ -218,17 +219,43 @@ const main = async (): Promise<void> => {
   let targetDir = args.target;
 
   if (!args.direction && !args.source && !args.target) {
-    if (hasAgents && hasClaude && !args.nonInteractive) {
-      const agentsSkills = await Effect.runPromise(detectSkills(agentsDir));
-      const claudeSkills = await Effect.runPromise(detectSkills(claudeDir));
-      direction = await promptDirection(
-        agentsSkills.length,
-        claudeSkills.length,
-      );
+    if (hasAgents && hasClaude) {
+      if (args.nonInteractive) {
+        direction = "to-claude";
+      } else {
+        const agentsSkills = await Effect.runPromise(detectSkills(agentsDir));
+        const claudeSkills = await Effect.runPromise(detectSkills(claudeDir));
+        direction = await promptDirection(
+          agentsSkills.length,
+          claudeSkills.length,
+        );
+      }
     } else if (hasAgents) {
-      direction = "to-claude";
+      if (args.nonInteractive) {
+        direction = "to-claude";
+      } else {
+        const skills = await Effect.runPromise(detectSkills(agentsDir));
+        const choice = await promptSingleDirection("agents", skills.length);
+        if (choice === "exit") {
+          closePrompts();
+          process.exit(0);
+          return;
+        }
+        direction = choice;
+      }
     } else if (hasClaude) {
-      direction = "to-agents";
+      if (args.nonInteractive) {
+        direction = "to-agents";
+      } else {
+        const skills = await Effect.runPromise(detectSkills(claudeDir));
+        const choice = await promptSingleDirection("claude", skills.length);
+        if (choice === "exit") {
+          closePrompts();
+          process.exit(0);
+          return;
+        }
+        direction = choice;
+      }
     } else {
       if (args.nonInteractive) {
         printWarning("No skills directories found.");
@@ -286,12 +313,17 @@ const main = async (): Promise<void> => {
     }
   }
 
+  const mode = args.nonInteractive ? args.mode || "symlink" : args.mode;
+  const conflict = args.nonInteractive
+    ? args.conflictResolution || "skip"
+    : args.conflictResolution;
+
   if (direction === "sync") {
     await runConversion(
       agentsDir,
       claudeDir,
-      args.mode || "symlink",
-      args.conflictResolution || "skip",
+      mode!,
+      conflict!,
       args.nonInteractive || false,
       ".agents → .claude",
     );
@@ -299,8 +331,8 @@ const main = async (): Promise<void> => {
     await runConversion(
       claudeDir,
       agentsDir,
-      args.mode || "symlink",
-      args.conflictResolution || "skip",
+      mode!,
+      conflict!,
       args.nonInteractive || false,
       ".claude → .agents",
     );
@@ -308,8 +340,8 @@ const main = async (): Promise<void> => {
     await runConversion(
       sourceDir!,
       targetDir!,
-      args.mode || "symlink",
-      args.conflictResolution || "skip",
+      mode!,
+      conflict!,
       args.nonInteractive || false,
     );
   }

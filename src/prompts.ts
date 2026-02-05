@@ -111,6 +111,36 @@ export const promptDirection = async (
   return answer;
 };
 
+export const promptSingleDirection = async (
+  source: "agents" | "claude",
+  skillCount: number,
+): Promise<ConversionDirection | "exit"> => {
+  const sourceDir = source === "agents" ? ".agents/skills/" : ".claude/skills/";
+  const targetDir = source === "agents" ? ".claude/skills/" : ".agents/skills/";
+  const direction = source === "agents" ? "to-claude" : "to-agents";
+
+  console.log(
+    `\n${pc.cyan("Found:")} ${pc.dim(sourceDir)} ${pc.bold(skillCount.toString())} skills`,
+  );
+
+  const answer = await select({
+    message: "Action",
+    choices: [
+      {
+        name: `${pc.green("Convert")} ${pc.dim(`→ ${targetDir}`)}`,
+        value: direction as ConversionDirection,
+      },
+      {
+        name: `${pc.dim("Exit")}`,
+        value: "exit" as const,
+      },
+    ],
+    default: direction,
+  });
+
+  return answer;
+};
+
 export const promptNoSkillsFound = async (): Promise<
   "create" | "specify" | "exit"
 > => {
